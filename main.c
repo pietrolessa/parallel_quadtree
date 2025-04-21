@@ -54,7 +54,7 @@ int main() {
     qtree_set_mutex(tree, omp_new_mutex, omp_lock, omp_unlock, omp_free_mutex);
 
     // Número máximo de pontos por nó antes de subdividir
-    qtree_setMaxNodeCnt(tree, 4);
+    qtree_setMaxNodeCnt(tree, 16);
 
     // Gerar pontos aleatórios
     Point *points = malloc(sizeof(Point) * NUM_POINTS);
