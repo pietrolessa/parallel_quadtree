@@ -205,18 +205,18 @@ subdivide(qtree p, qnode *q) {
 
     //double t0 = omp_get_wtime();
 
-    #pragma omp parallel sections
+    //#pragma omp parallel sections
     {
-        #pragma omp section
+        //#pragma omp section
         q->nw = qnode_new(p, cx - hw, cy - hh, hw, hh);
 
-        #pragma omp section
+        //#pragma omp section
         q->ne = qnode_new(p, cx + hw, cy - hh, hw, hh);
 
-        #pragma omp section
+        //#pragma omp section
         q->sw = qnode_new(p, cx - hw, cy + hh, hw, hh);
 
-        #pragma omp section
+        //#pragma omp section
         q->se = qnode_new(p, cx + hw, cy + hh, hw, hh);
     }
 
