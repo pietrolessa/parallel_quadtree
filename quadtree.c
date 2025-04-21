@@ -22,11 +22,11 @@
   it. Define NO_THREAD_SAFETY to remove all thread safety features at
   build time.
 */
-#ifndef NO_THREAD_SAFETY
+//#ifndef NO_THREAD_SAFETY
  #define QTREE_THREADSAFE 1
-#else
- #define QTREE_THREADSAFE 0
-#endif
+//#else
+// #define QTREE_THREADSAFE 0
+//#endif
 
 #if QTREE_THREADSAFE == 1
  #define QTNEWMUTEX(X) (q->newfn)(X)
@@ -41,7 +41,7 @@
 #endif
 
 // Variable to measure total time of the parallel subdivisions
-double totalSubdivisionTime = 0.0;
+//double totalSubdivisionTime = 0.0;
 
 /// A function pointer def for determining if an element exists in a range
 typedef int (*qtree_fnc)(void *ptr, aabb *range);
@@ -205,27 +205,27 @@ subdivide(qtree p, qnode *q) {
 
     //double t0 = omp_get_wtime();
 
-    //#pragma omp parallel sections
+    #pragma omp parallel sections
     {
-        //#pragma omp section
+        #pragma omp section
         q->nw = qnode_new(p, cx - hw, cy - hh, hw, hh);
 
-        //#pragma omp section
+        #pragma omp section
         q->ne = qnode_new(p, cx + hw, cy - hh, hw, hh);
 
-        //#pragma omp section
+        #pragma omp section
         q->sw = qnode_new(p, cx - hw, cy + hh, hw, hh);
 
-        //#pragma omp section
+        #pragma omp section
         q->se = qnode_new(p, cx + hw, cy + hh, hw, hh);
     }
 
     //double t1 = omp_get_wtime();
 
     //#pragma omp critical
-//    {
-//       totalSubdivisionTime += (t1 - t0);
-//    }
+    //    {
+    //       totalSubdivisionTime += (t1 - t0);
+    //    }
 }
 
 
