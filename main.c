@@ -66,7 +66,7 @@ int main() {
     // Medir tempo com omp_get_wtime()
     double start = omp_get_wtime();
 
-    #pragma omp parallel for default(none) shared(tree, points) private(i)
+    #pragma omp parallel for shared(tree, points)
     for (int i = 0; i < NUM_POINTS; i++) {
         qtree_insert(tree, &points[i]);
     }
