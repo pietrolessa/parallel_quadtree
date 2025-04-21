@@ -203,29 +203,29 @@ subdivide(qtree p, qnode *q) {
     float hw = q->bound.dims.w / 2;
     float hh = q->bound.dims.h / 2;
 
-    double t0 = omp_get_wtime();
+    //double t0 = omp_get_wtime();
 
-    #pragma omp parallel sections
+    //#pragma omp parallel sections
     {
-        #pragma omp section
+        //#pragma omp section
         q->nw = qnode_new(p, cx - hw, cy - hh, hw, hh);
 
-        #pragma omp section
+        //#pragma omp section
         q->ne = qnode_new(p, cx + hw, cy - hh, hw, hh);
 
-        #pragma omp section
+        //#pragma omp section
         q->sw = qnode_new(p, cx - hw, cy + hh, hw, hh);
 
-        #pragma omp section
+        //#pragma omp section
         q->se = qnode_new(p, cx + hw, cy + hh, hw, hh);
     }
 
-    double t1 = omp_get_wtime();
+    //double t1 = omp_get_wtime();
 
-    #pragma omp critical
-    {
-        totalSubdivisionTime += (t1 - t0);
-    }
+    //#pragma omp critical
+//    {
+//       totalSubdivisionTime += (t1 - t0);
+//    }
 }
 
 
