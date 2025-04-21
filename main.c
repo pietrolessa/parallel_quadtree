@@ -5,6 +5,8 @@
 #include "quadtree.h"
 #include "aabb.h"
 
+extern double totalSubdivisionTime;
+
 // Número de pontos a inserir na árvore
 #define NUM_POINTS 100000
 
@@ -43,9 +45,12 @@ int main() {
     double end = omp_get_wtime();
     printf("Tempo de inserção: %.6f segundos\n", end - start);
 
+    printf("Tempo total apenas da subdivisão paralela: %.6f segundos\n", totalSubdivisionTime);
+
     // Limpeza
     qtree_free(tree);
     free(points);
+
 
     return 0;
 }
