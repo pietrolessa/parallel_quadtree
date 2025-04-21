@@ -13,6 +13,8 @@
  #include "aabb.h"
 #endif
 
+#include <stdint.h>
+
 /// Opaque pointer to a quadtree data structure
 typedef struct _qtree* qtree;
 
@@ -22,7 +24,7 @@ typedef int (*qtree_fnc)(void *ptr, aabb *range);
 /// Create a new qtree
 /*!
   Creates a new qtree with a bound of w,h size, centered at x,y.
-  
+
   Uses the passed function pointer fnc to test elements against nodes
   for insertion, and finding.
 
