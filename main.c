@@ -1,21 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <omp.h>              // Para medir tempo e usar OpenMP
+#include <omp.h>
 #include "quadtree.h"
 #include "aabb.h"
 
-//extern double totalSubdivisionTime;
-
-// Número de pontos a inserir na árvore
 #define NUM_POINTS 100000
 
-// Struct simples de ponto com coordenadas
 typedef struct {
     float x, y;
 } Point;
 
-// Função de comparação usada pela quadtree
 int point_in_range(void *ptr, aabb *range) {
     Point *p = (Point *)ptr;
     return aabb_contains(range, p->x, p->y);
@@ -45,16 +39,7 @@ int omp_free_mutex(void *lock) {
 }
 
 int main() {
-    printf("Iniciando inserção de pontos na Quadtree...\n");
-
-    // Cria a árvore cobrindo de (0,0) até (1000,1000)
-    qtree tree = qtree_new(500, 500, 1000, 1000, point_in_range);
-
-    // Ativa suporte a múltiplas threads com OpenMP
-    qtree_set_mutex(tree, omp_new_mutex, omp_lock, omp_unlock, omp_free_mutex);
-
-    // Número máximo de pontos por nó antes de subdividir
-    qtree_setMaxNodeCnt(tree, 16);
+    printf("Iniciando inserção de pontos na Quadtree com múltiplas threads...\n");
 
     // Gerar pontos aleatórios
     Point *points = malloc(sizeof(Point) * NUM_POINTS);
@@ -63,21 +48,52 @@ int main() {
         points[i].y = (float)(rand() % 1000);
     }
 
-    // Medir tempo com omp_get_wtime()
-    double start = omp_get_wtime();
+    int num_threads = omp_get_max_threads();
+    qtree *thread_trees = malloc(sizeof(qtree) * num_threads);
 
-    #pragma omp parallel for shared(tree, points)
-    for (int i = 0; i < NUM_POINTS; i++) {
-        qtree_insert(tree, &points[i]);
+    for (int i = 0; i < num_threads; i++) {
+        thread_trees[i] = qtree_new(500, 500, 1000, 1000, point_in_range);
+        qtree_setMaxNodeCnt(thread_trees[i], 16);
+        qtree_set_mutex(thread_trees[i], omp_new_mutex, omp_lock, omp_unlock, omp_free_mutex);
     }
 
+    double startTime = omp_get_wtime();
+
+    // Inserção paralela em árvores independentes
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        int chunk = NUM_POINTS / num_threads;
+        int start = tid * chunk;
+        int end = (tid == num_threads - 1) ? NUM_POINTS : start + chunk;
+
+        for (int i = start; i < end; i++) {
+            qtree_insert(thread_trees[tid], &points[i]);
+        }
+    }
+
+    // Mescla para árvore final
+    qtree final_tree = qtree_new(500, 500, 1000, 1000, point_in_range);
+    qtree_setMaxNodeCnt(final_tree, 16);
+    qtree_set_mutex(final_tree, omp_new_mutex, omp_lock, omp_unlock, omp_free_mutex);
+
+    for (int t = 0; t < num_threads; t++) {
+        uint32_t count;
+        void **elems = qtree_findInArea(thread_trees[t], 0, 0, 1000, 1000, &count);
+
+        for (uint32_t i = 0; i < count; i++) {
+            qtree_insert(final_tree, elems[i]);
+        }
+
+        free(elems);
+        qtree_free(thread_trees[t]);
+    }
+    free(thread_trees);
+
     double end = omp_get_wtime();
-    printf("Tempo de inserção: %.6f segundos\n", end - start);
-   // printf("Tempo total apenas da subdivisão paralela: %.6f segundos\n", totalSubdivisionTime);
+    printf("Tempo total com paralelismo e merge: %.6f segundos\n", end - startTime);
 
-    // Limpeza
-    qtree_free(tree);
+    qtree_free(final_tree);
     free(points);
-
     return 0;
 }
